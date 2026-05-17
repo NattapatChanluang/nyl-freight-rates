@@ -241,6 +241,9 @@ td.c-carrier{color:var(--text2);font-size:11px}
 .share-btn:hover{border-color:var(--blue);color:var(--blue)}
 .print-btn{width:100%;margin-top:6px;padding:9px;background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--text2);font-family:var(--sans);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s}
 .print-btn:hover{border-color:var(--purple);color:var(--purple)}
+.img-btn{width:100%;margin-top:6px;padding:9px;background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--text2);font-family:var(--sans);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s}
+.img-btn:hover{border-color:var(--teal);color:var(--teal)}
+.img-btn.saving{border-color:var(--teal)!important;color:var(--teal)!important}
 
 /* ── PRICE MODAL ── */
 .price-modal{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(6px)}
@@ -343,7 +346,7 @@ td.c-carrier{color:var(--text2);font-size:11px}
     <div class="pm-price-row">
       <span class="pm-currency">USD</span>
       <span class="pm-amount" id="pm-amount">–</span>
-      <span class="pm-unit">/ Container</span>
+      <span class="pm-unit">/ <span id="pm-container-type">Container</span></span>
     </div>
     <div class="pm-grid" id="pm-grid"></div>
     <div class="pm-note" id="pm-note"></div>
@@ -976,7 +979,7 @@ function buildRates(r){
       ${c.badge?`<div class="rc-badge">${c.badge}</div>`:''}
       <div class="rc-lbl">${c.lbl}</div>
       <div class="rc-val ${nil?'nil':c.cls}">${nil?'N/A':'USD '+n.toLocaleString()}</div>
-      <div class="rc-unit">${nil?'ไม่มีอัตรานี้':'per Container'}</div>
+      <div class="rc-unit">${nil?'ไม่มีอัตรานี้':'per '+c.lbl+' Container'}</div>
       ${nil?'':`<div class="rc-tooltip">คลิกเพื่อดูรายละเอียด</div>`}
     </div>`;
   }).join('');
@@ -1146,6 +1149,7 @@ function openPriceModal(e,row,col){
   document.getElementById('pm-pol').textContent=rv(row,'POL')||'–';
   document.getElementById('pm-pod').textContent=rv(row,'POD')||'–';
   document.getElementById('pm-amount').textContent=n.toLocaleString();
+  document.getElementById('pm-container-type').textContent=(PRICE_LABELS[canon]||canon)+' Container';
   const ts=(rv(row,'T/S')||'').trim(),dr=isDirect(ts);
   document.getElementById('pm-grid').innerHTML=[
     {l:'Country',v:rv(row,'Country')||'–',c:''},
@@ -1206,6 +1210,185 @@ function exportCSV(){
     .map(r=>r.join(',')).join('\n');
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob(['\uFEFF'+rows],{type:'text/csv;charset=utf-8;'})),download:'NYL_Rate_'+new Date().toISOString().slice(0,10)+'.csv'});
   a.click();URL.revokeObjectURL(a.href);
+}
+
+// ═══════════════════════════════════════
+// SAVE AS IMAGE
+// ═══════════════════════════════════════
+function saveImage(){
+  if(!currentRow)return;
+  const btn=document.getElementById('img-btn');
+  btn.textContent='⏳ กำลังสร้างรูป…';btn.classList.add('saving');
+
+  const r=currentRow;
+  const ts=(rv(r,'T/S')||'').trim(),dr=isDirect(ts);
+  const prices=[
+    {lbl:"20' GP",val:fp(rv(r,"20'GP (USD)"))},
+    {lbl:"40' GP",val:fp(rv(r,"40'GP (USD)"))},
+    {lbl:"40' HC",val:fp(rv(r,"40'HC"))},
+    {lbl:"20' RF",val:fp(rv(r,"20'RF"))},
+    {lbl:"40' RF",val:fp(rv(r,"40'RF"))},
+  ];
+  const pol=rv(r,'POL')||'–',pod=rv(r,'POD')||'–';
+  const carrier=rv(r,'Carrier')||'–',country=rv(r,'Country')||'–';
+  const zone=rv(r,'Zone')||'–',tt=rv(r,'T/T')||'–';
+  const freetime=rv(r,'Freetime')||'–',validity=rv(r,'Validity')||'–';
+  const service=rv(r,'Service')||'–',remark=rv(r,'Remark')||'';
+  const routing=dr?'Direct':ts;
+
+  // canvas size
+  const W=720,PAD=40;
+  const priceRows=prices.filter(p=>p.val!=='N/A').length;
+  const remarkH=remark&&remark!=='-'?80:0;
+  const H=420+priceRows*0+remarkH;
+
+  const canvas=document.createElement('canvas');
+  canvas.width=W*2;canvas.height=H*2; // retina
+  const ctx=canvas.getContext('2d');
+  ctx.scale(2,2);
+
+  // ── Background ──
+  ctx.fillStyle='#10131a';
+  ctx.fillRect(0,0,W,H);
+
+  // ── Red accent bar top ──
+  ctx.fillStyle='#b83025';
+  ctx.fillRect(0,0,W,4);
+
+  // ── NYL Logo box ──
+  roundRect(ctx,PAD,20,44,44,8);
+  ctx.fillStyle='#b83025';ctx.fill();
+  ctx.fillStyle='#ffffff';ctx.font='bold 13px monospace';
+  ctx.textAlign='center';ctx.fillText('NYL',PAD+22,47);
+
+  // ── Brand text ──
+  ctx.textAlign='left';
+  ctx.fillStyle='#d8dde8';ctx.font='bold 14px "DM Sans",sans-serif';
+  ctx.fillText('Ocean Freight Rate',PAD+54,36);
+  ctx.fillStyle='#6e748a';ctx.font='10px "DM Sans",sans-serif';
+  ctx.fillText('NAMYONG LOGISTICS COMPANY LIMITED',PAD+54,52);
+
+  // ── Date ──
+  ctx.fillStyle='#363b50';ctx.font='10px monospace';ctx.textAlign='right';
+  ctx.fillText(new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}),W-PAD,52);
+
+  // ── Divider ──
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PAD,76);ctx.lineTo(W-PAD,76);ctx.stroke();
+
+  // ── Route ──
+  ctx.textAlign='left';
+  ctx.fillStyle='#17c4d4';ctx.font='bold 22px "Syne",sans-serif';
+  ctx.fillText(pol,PAD,108);
+  const polW=ctx.measureText(pol).width;
+  ctx.fillStyle='#b83025';ctx.font='bold 18px "Syne",sans-serif';
+  ctx.fillText('→',PAD+polW+10,108);
+  const arrW=ctx.measureText('→').width;
+  ctx.fillStyle='#d8dde8';ctx.font='bold 22px "Syne",sans-serif';
+  ctx.fillText(pod,PAD+polW+arrW+20,108);
+
+  // ── Carrier / Country / Zone ──
+  ctx.fillStyle='#d8dde8';ctx.font='500 13px "DM Sans",sans-serif';
+  ctx.fillText(`${carrier}`,PAD,130);
+  ctx.fillStyle='#6e748a';ctx.font='12px "DM Sans",sans-serif';
+  ctx.fillText(`${country}  ·  Zone: ${zone}`,PAD,148);
+
+  // ── Divider ──
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PAD,162);ctx.lineTo(W-PAD,162);ctx.stroke();
+
+  // ── Price cards ──
+  const cardW=(W-PAD*2-12*4)/5;
+  prices.forEach((p,i)=>{
+    const x=PAD+i*(cardW+12),y=174;
+    const hasVal=p.val!=='N/A';
+    // card bg
+    roundRect(ctx,x,y,cardW,88,8);
+    ctx.fillStyle=hasVal?'#1c2030':'#161921';ctx.fill();
+    if(hasVal){
+      ctx.strokeStyle='rgba(74,158,255,0.2)';ctx.lineWidth=1;
+      roundRect(ctx,x,y,cardW,88,8);ctx.stroke();
+    }
+    // label
+    ctx.fillStyle='#363b50';ctx.font='bold 8px "Syne",sans-serif';
+    ctx.textAlign='left';ctx.fillText(p.lbl.toUpperCase(),x+10,y+18);
+    // value
+    if(hasVal){
+      const parts=p.val.split(' ');// "USD 40"
+      ctx.fillStyle='#363b50';ctx.font='500 10px monospace';
+      ctx.fillText(parts[0],x+10,y+45);
+      const usdW=ctx.measureText(parts[0]+' ').width;
+      ctx.fillStyle='#4a9eff';ctx.font='bold 22px monospace';
+      ctx.fillText(parts[1]||'',x+10+usdW,y+48);
+      ctx.fillStyle='#363b50';ctx.font='9px monospace';
+      ctx.fillText('per '+p.lbl+' Container',x+10,y+68);
+    } else {
+      ctx.fillStyle='#363b50';ctx.font='bold 16px "DM Mono",monospace';
+      ctx.fillText('N/A',x+10,y+52);
+      ctx.fillStyle='#2a3040';ctx.font='9px monospace';
+      ctx.fillText('ไม่มีอัตรานี้',x+10,y+68);
+    }
+  });
+
+  // ── Info rows ──
+  const infoY=280;
+  const infos=[
+    ['Routing',routing,dr?'#19c47a':'#e8a020'],
+    ['Transit Time',tt,'#17c4d4'],
+    ['Freetime',freetime,'#d8dde8'],
+    ['Service',service,'#9d7aff'],
+    ['Validity',validity,'#e8a020'],
+  ];
+  const colW2=(W-PAD*2-16)/2;
+  infos.forEach((inf,i)=>{
+    const col=i%2,row=Math.floor(i/2);
+    const x=PAD+col*(colW2+16),y=infoY+row*52;
+    roundRect(ctx,x,y,colW2,42,6);
+    ctx.fillStyle='#161921';ctx.fill();
+    ctx.fillStyle='#363b50';ctx.font='bold 8px "Syne",sans-serif';
+    ctx.textAlign='left';ctx.fillText(inf[0].toUpperCase(),x+10,y+14);
+    ctx.fillStyle=inf[2];ctx.font='500 13px "DM Mono",monospace';
+    ctx.fillText(inf[1],x+10,y+32);
+  });
+
+  // ── Remark ──
+  let finalY=infoY+Math.ceil(infos.length/2)*52+14;
+  if(remark&&remark!=='-'){
+    ctx.strokeStyle='#e8a020';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(PAD,finalY);ctx.lineTo(PAD,finalY+56);ctx.stroke();
+    ctx.fillStyle='#363b50';ctx.font='bold 8px "Syne",sans-serif';
+    ctx.textAlign='left';ctx.fillText('REMARK / CONDITION',PAD+10,finalY+14);
+    ctx.fillStyle='#6e748a';ctx.font='11px "DM Sans",sans-serif';
+    // wrap text
+    wrapText(ctx,remark,PAD+10,finalY+30,W-PAD*2-10,16);
+    finalY+=remarkH;
+  }
+
+  // ── Footer ──
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PAD,H-30);ctx.lineTo(W-PAD,H-30);ctx.stroke();
+  ctx.fillStyle='#363b50';ctx.font='9px "DM Sans",sans-serif';
+  ctx.textAlign='left';ctx.fillText('Namyong Logistics Company Limited',PAD,H-14);
+  ctx.textAlign='right';ctx.fillText('nattapatchanluang.github.io/nyl-freight-rates',W-PAD,H-14);
+
+  // ── Download ──
+  const link=document.createElement('a');
+  const filename=`NYL_Rate_${pol.replace(/\s/g,'_')}_${pod.replace(/[^a-zA-Z0-9]/g,'_')}_${carrier}.png`;
+  link.download=filename;
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+
+  btn.textContent='✅ บันทึกรูปแล้ว!';
+  setTimeout(()=>{btn.textContent='🖼 Save เป็นรูปภาพ';btn.classList.remove('saving')},2500);
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePM();closePanel()}});
