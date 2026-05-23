@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#10131a">
+<title>NYL Ocean Freight Rate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0b0d12;--bg2:#10131a;--bg3:#161921;--bg4:#1c2030;--bg5:#232840;
+  --line:rgba(255,255,255,.055);--line2:rgba(255,255,255,.1);
+  --red:#b83025;--red2:#e03a2c;--red-s:rgba(184,48,37,.15);
+  --blue:#4a9eff;--green:#19c47a;--green-s:rgba(25,196,122,.12);
+  --amber:#e8a020;--amber-s:rgba(232,160,32,.12);
+  --teal:#17c4d4;--purple:#9d7aff;
+  --text:#d8dde8;--text2:#6e748a;--text3:#363b50;
+  --shadow:0 8px 32px rgba(0,0,0,.45);
+  --panel-w:500px;--ease:cubic-bezier(.22,.68,0,1.15);
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--head:'Syne',sans-serif;
+  --bottom-bar:60px;
+}
+[data-theme="light"]{
+  --bg:#f4f5f8;--bg2:#fff;--bg3:#f0f1f5;--bg4:#e5e7ef;--bg5:#dde0ea;
+  --line:rgba(0,0,0,.07);--line2:rgba(0,0,0,.13);
+  --red:#c0392b;--red2:#e74c3c;--red-s:rgba(192,57,43,.08);
+  --blue:#2878e0;--green:#179f60;--amber:#c47d0a;--teal:#0a9aa8;--purple:#6c4fd4;
+  --text:#1a1d28;--text2:#5a6080;--text3:#9aa0b8;--shadow:0 8px 32px rgba(0,0,0,.12);
+}
+[data-theme="navy"]{
+  --bg:#060c1f;--bg2:#0b1530;--bg3:#101d3f;--bg4:#162450;--bg5:#1c2d62;
+  --line:rgba(100,140,255,.1);--line2:rgba(100,140,255,.18);
+  --red:#e05a3a;--red2:#f07050;--red-s:rgba(224,90,58,.15);
+  --blue:#5eb8ff;--green:#3de0a0;--amber:#ffb830;--teal:#38e8f8;--purple:#c090ff;
+  --text:#c8d8f8;--text2:#607898;--text3:#2a3a58;--shadow:0 8px 40px rgba(0,0,0,.6);
+}
+[data-theme="sand"]{
+  --bg:#f7f3ee;--bg2:#fdfaf6;--bg3:#f0ebe2;--bg4:#e8e0d4;--bg5:#ddd4c5;
+  --line:rgba(100,80,40,.08);--line2:rgba(100,80,40,.15);
+  --red:#a83420;--red2:#c94030;--red-s:rgba(168,52,32,.08);
+  --blue:#2860a0;--green:#287850;--amber:#9c6010;--teal:#186878;--purple:#5840a0;
+  --text:#2c2418;--text2:#706050;--text3:#b0a080;--shadow:0 8px 32px rgba(80,60,20,.15);
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+
+/* ══ LOCK ══ */
+#lock{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.lock-box{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;padding:32px 28px;width:100%;max-width:320px;text-align:center;box-shadow:var(--shadow)}
+.lock-ico{width:48px;height:48px;background:var(--red);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:500;color:#fff;margin:0 auto 16px;position:relative;overflow:hidden}
+.lock-ico::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 55%)}
+.lock-title{font-family:var(--head);font-size:17px;font-weight:700;margin-bottom:4px}
+.lock-sub{font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:24px}
+#pin{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:20px;text-align:center;letter-spacing:6px;outline:none;transition:border-color .2s;margin-bottom:10px}
+#pin:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-s)}
+#pin-err{font-size:11px;color:var(--red2);min-height:16px;margin-bottom:10px}
+.lock-btn{width:100%;padding:12px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
+.lock-btn:hover,.lock-btn:active{background:var(--red2)}
+.lock-hint{margin-top:12px;font-size:10px;color:var(--text3)}
+
+/* ══ OFFLINE ══ */
+#offline-bar{display:none;position:fixed;top:0;left:0;right:0;z-index:600;background:#7b2c00;color:#ffd4b0;padding:8px 16px;font-size:12px;text-align:center;border-bottom:1px solid rgba(255,100,0,.3)}
+
+/* ══ TOAST ══ */
+#toast{display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:500;background:var(--bg2);border:1px solid var(--line2);border-radius:20px;padding:10px 20px;font-size:12px;color:var(--text2);font-family:var(--mono);box-shadow:var(--shadow);white-space:nowrap;transition:opacity .3s}
+
+/* ══ HEADER ══ */
+header{
+  height:54px;background:var(--bg2);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;position:sticky;top:0;z-index:300;transition:background .3s,top .2s;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:32px;height:32px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:500;color:#fff;flex-shrink:0;position:relative;overflow:hidden}
+.brand-icon::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 55%)}
+.brand-name{font-family:var(--head);font-weight:700;font-size:14px}
+.brand-sub{font-size:9px;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase}
+.hdr-r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#hdr-status{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s,box-shadow .3s}
+.dot.on{background:var(--green);box-shadow:0 0 8px var(--green)}.dot.err{background:var(--red2)}
+#hdr-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
+#refresh-cd{font-family:var(--mono);font-size:10px;color:var(--text3);display:none;align-items:center;gap:2px}
+.btn{padding:6px 12px;border-radius:6px;border:none;font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--line)}.btn-ghost:hover{color:var(--text);background:var(--bg3)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.theme-picker{display:flex;align-items:center;gap:4px}
+.th-btn{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s;flex-shrink:0}
+.th-btn:hover{transform:scale(1.2)}.th-btn.active{border-color:var(--text)!important;transform:scale(1.15)}
+.th-dark{background:#10131a;border-color:#363b50}.th-light{background:#f4f5f8;border-color:#dde0ea}
+.th-navy{background:#0b1530;border-color:#1c2d62}.th-sand{background:#f0ebe2;border-color:#ddd4c5}
+
+/* ══ DESKTOP NAV TABS ══ */
+.nav-tabs{height:38px;background:var(--bg2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:4px;transition:background .3s}
+.nav-tab{padding:6px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;font-family:var(--head);cursor:pointer;border:none;background:transparent;color:var(--text3);border-radius:5px;transition:all .15s}
+.nav-tab:hover{color:var(--text2);background:var(--bg3)}.nav-tab.on{color:var(--red);background:var(--red-s)}
+
+/* ══ MOBILE BOTTOM NAV ══ */
+.mobile-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;
+  height:var(--bottom-bar);background:var(--bg2);border-top:1px solid var(--line2);
+  flex-direction:row;align-items:stretch;
+}
+.mob-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border:none;background:transparent;cursor:pointer;
+  color:var(--text3);font-family:var(--sans);font-size:9px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px;transition:color .15s;padding:6px 0;
+}
+.mob-nav-btn.on{color:var(--red)}
+.mob-nav-ico{font-size:18px;line-height:1}
+
+/* ══ SHELL ══ */
+.shell{display:flex;height:calc(100vh - 92px);overflow:hidden}
+.left{flex:1;display:flex;flex-direction:column;overflow:hidden;transition:margin-right .36s var(--ease)}
+.shell.open .left{margin-right:var(--panel-w)}
+.view{display:none;flex-direction:column;flex:1;overflow:hidden}
+.view.on{display:flex}
+
+/* ══ STATS ══ */
+.stats{display:flex;border-bottom:1px solid var(--line);background:var(--bg2);transition:background .3s;flex-shrink:0;overflow-x:auto}
+.st{flex:1;min-width:80px;padding:8px 12px;border-right:1px solid var(--line)}
+.st:last-child{border-right:none}
+.st-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1.3px;color:var(--text3);font-weight:700;margin-bottom:3px;white-space:nowrap}
+.st-val{font-family:var(--mono);font-size:18px;font-weight:500;line-height:1}
+.st-sub{font-size:9px;color:var(--text3);margin-top:2px}
+
+/* ══ FILTERS ══ */
+.filters{padding:8px 12px;border-bottom:1px solid var(--line);background:var(--bg2);transition:background .3s;flex-shrink:0}
+.filter-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700}
+.fg input,.fg select{background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;min-width:90px;transition:border-color .2s}
+.fg input:focus,.fg select:focus{border-color:var(--red)}
+.fg select option{background:var(--bg3)}
+.fa{display:flex;gap:6px;align-items:flex-end;margin-left:auto}
+
+/* Mobile filter toggle */
+.filter-toggle{display:none;width:100%;padding:8px;background:var(--bg3);border:1px solid var(--line);border-radius:6px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;text-align:center;margin-bottom:8px;transition:all .15s}
+.filter-toggle:active{background:var(--bg4)}
+.filter-content{display:flex;flex-direction:column;gap:8px}
+
+/* ══ TABLE ══ */
+.tbl-wrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{position:sticky;top:0;z-index:10}
+thead tr{background:var(--bg3);transition:background .3s}
+th{padding:8px 10px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.9px;color:var(--text2);font-weight:700;font-family:var(--head);border-bottom:1px solid var(--line2);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
+th:hover{color:var(--text)}.th-price{text-align:right}
+th.asc::after{content:' ▲';font-size:7px;color:var(--red)}
+th.desc::after{content:' ▼';font-size:7px;color:var(--red)}
+tbody tr{border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s}
+tbody tr:hover{background:var(--bg3)}
+tbody tr.active{background:var(--bg4)!important}
+tbody tr.active td:first-child{border-left:2px solid var(--red);padding-left:8px}
+tbody tr.row-best{border-left:2px solid var(--green)}
+tbody tr.row-expiring{border-left:2px solid var(--amber)}
+td{padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;vertical-align:middle;color:var(--text)}
+td.c-num{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--blue);text-align:right;cursor:pointer;min-width:100px}
+td.c-num:hover{color:var(--red2)}
+td.c-num.nil{color:var(--text3);cursor:default;text-align:center;min-width:50px}
+td.c-num.hi{color:var(--amber)}.td.c-num.text-val{color:var(--text2);cursor:default;font-size:11px}
+.usd-tag{font-size:8px;font-weight:700;opacity:.45;margin-right:2px;font-family:var(--mono)}
+td.c-port{font-family:var(--mono);font-size:11px;color:var(--teal)}
+td.c-tt{font-family:var(--mono);font-size:11px;color:var(--amber)}
+td.c-valid{font-family:var(--mono);font-size:10px;color:var(--text2)}
+td.c-svc{font-size:10px;color:var(--purple)}
+td.c-remark{font-size:10px;color:var(--text3);font-style:normal;max-width:120px}
+td.c-carrier{color:var(--text2);font-size:11px}
+.badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:3px;font-size:8px;font-weight:700;letter-spacing:.5px;font-family:var(--mono);text-transform:uppercase}
+.b-direct{background:var(--green-s);color:var(--green);border:1px solid rgba(25,196,122,.2)}
+.b-ts{background:var(--amber-s);color:var(--amber);border:1px solid rgba(232,160,32,.2)}
+.val-badge{display:inline-flex;align-items:center;margin-left:4px;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;font-family:var(--mono);vertical-align:middle}
+.val-warn{background:var(--amber-s);color:var(--amber);border:1px solid rgba(232,160,32,.3)}
+.val-expired{background:var(--red-s);color:var(--red2);border:1px solid rgba(184,48,37,.3)}
+.state-box{padding:60px 20px;text-align:center;color:var(--text3)}
+.state-box .ico{font-size:30px;display:block;margin-bottom:10px}
+.state-box p{font-size:13px;margin-bottom:4px;color:var(--text2)}
+.state-box small{font-family:var(--mono);font-size:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:24px;height:24px;border:2px solid var(--line2);border-top-color:var(--red);border-radius:50%;animation:spin .65s linear infinite;margin:0 auto 12px}
+
+/* ══ MOBILE CARD VIEW (replaces table on mobile) ══ */
+.card-list{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px}
+.rate-card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .15s;active:background:var(--bg3)}
+.rate-card:active{background:var(--bg3);transform:scale(.99)}
+.rate-card.row-best{border-left:3px solid var(--green)}
+.rate-card.row-expiring{border-left:3px solid var(--amber)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.card-route{font-family:var(--head);font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px}
+.card-pol{color:var(--teal);font-size:13px}
+.card-arr{color:var(--red);font-size:11px}
+.card-pod{color:var(--text);font-size:14px}
+.card-badge-wrap{display:flex;gap:4px;align-items:center}
+.card-meta{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.card-meta-item{font-size:11px;color:var(--text2)}
+.card-meta-item strong{color:var(--text);font-weight:500}
+.card-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.card-price-item{background:var(--bg3);border-radius:7px;padding:8px 10px}
+.card-price-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:700;margin-bottom:3px}
+.card-price-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--blue)}
+.card-price-val.nil{color:var(--text3);font-size:11px}
+.card-price-val.hi{color:var(--amber)}
+.card-price-val.best{color:var(--green)}
+
+/* ══ DETAIL PANEL (desktop side, mobile bottom sheet) ══ */
+.panel{
+  position:fixed;top:92px;right:0;width:var(--panel-w);height:calc(100vh - 92px);
+  background:var(--bg2);border-left:1px solid var(--line2);
+  transform:translateX(100%);transition:transform .36s var(--ease),background .3s;
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow);
+}
+.panel.open{transform:translateX(0)}
+.p-hero{padding:16px 18px 0;flex-shrink:0;border-bottom:1px solid var(--line);background:var(--bg2);transition:background .3s}
+.p-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.p-route-title{font-family:var(--head);font-size:18px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+.p-pol{color:var(--teal)}.p-arr{color:var(--red)}.p-pod{color:var(--text)}
+.p-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.p-carrier{font-size:12px;font-weight:600}.p-country{font-size:11px;color:var(--text2)}.p-sep{color:var(--text3)}
+.close-btn{width:28px;height:28px;background:var(--bg3);border:1px solid var(--line);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:15px;transition:all .15s;flex-shrink:0;min-width:28px}
+.close-btn:hover,.close-btn:active{border-color:var(--red);color:var(--red)}
+.p-tabs{display:flex;border-bottom:1px solid var(--line);background:var(--bg2);flex-shrink:0;transition:background .3s;overflow-x:auto}
+.tab{padding:10px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;font-family:var(--head);cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--text2)}.tab.on{color:var(--red);border-bottom-color:var(--red)}
+.p-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 18px 28px;background:var(--bg);transition:background .3s;-webkit-overflow-scrolling:touch}
+.pane{display:none}.pane.on{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.sec{margin-bottom:14px}
+.sec-ttl{font-size:8px;text-transform:uppercase;letter-spacing:1.3px;color:var(--text3);font-weight:700;font-family:var(--head);padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.info-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
+.info-row:last-child{border-bottom:none}
+.ik{font-size:11px;color:var(--text2)}.iv{font-size:12px;color:var(--text);font-weight:500;text-align:right;max-width:60%;word-break:break-word}
+.iv.mono{font-family:var(--mono);font-size:11px}
+.iv.green{color:var(--green)}.iv.amber{color:var(--amber)}.iv.teal{color:var(--teal)}.iv.purple{color:var(--purple)}.iv.blue{color:var(--blue)}
+.rates-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.rc{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:12px 14px;transition:border-color .2s,transform .15s,background .3s;position:relative;overflow:hidden}
+.rc:hover{border-color:var(--line2);transform:translateY(-1px)}
+.rc.span2{grid-column:span 2;background:var(--bg3)}
+.rc.clickable{cursor:pointer}.rc.clickable:hover{border-color:var(--red)}
+.rc-badge{position:absolute;top:7px;right:10px;font-size:7px;font-family:var(--mono);letter-spacing:.5px;padding:1px 5px;border-radius:3px;background:var(--blue-s,rgba(74,158,255,.12));color:var(--blue);font-weight:700}
+.rc-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);font-weight:700;margin-bottom:5px;font-family:var(--head);transition:color .15s}
+.rc.clickable:hover .rc-lbl{color:var(--red)}
+.rc-val{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1}
+.rc-val.nil{font-size:16px;color:var(--text3)}.rc-val.blue{color:var(--blue)}.rc-val.amber{color:var(--amber)}.rc-val.teal{color:var(--teal)}
+.rc-unit{font-size:9px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.rc-tooltip{display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);border-radius:9px;align-items:center;justify-content:center;font-size:10px;color:#fff;font-family:var(--mono);backdrop-filter:blur(3px)}
+.rc.clickable:hover .rc-tooltip{display:flex}
+.ft-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.ft{background:var(--bg2);border:1px solid var(--line);border-radius:7px;padding:10px 12px;transition:background .3s}
+.ft-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px}
+.ft-val{font-family:var(--mono);font-size:12px;font-weight:500}
+.tt-vis{background:var(--bg2);border:1px solid var(--line);border-radius:7px;padding:11px 13px;margin-top:7px;transition:background .3s}
+.tt-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:7px}
+.tt-bar{height:4px;background:var(--line2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+.tt-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--amber));border-radius:2px;transition:width 1.2s ease}
+.tt-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--text3)}
+.vblock{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:0 7px 7px 0;padding:11px 13px;margin-top:7px;transition:background .3s}
+.vb-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px}
+.vb-val{font-family:var(--mono);font-size:13px;color:var(--amber)}
+.remark-box{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:0 7px 7px 0;padding:11px 13px;font-size:12px;color:var(--text2);line-height:2;white-space:pre-wrap;word-break:break-word;transition:background .3s}
+.sum-card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px;transition:background .3s}
+.sum-route{font-family:var(--head);font-size:15px;font-weight:800;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.si-lbl{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:3px}
+.si-val{font-family:var(--mono);font-size:13px;font-weight:500}
+.sum-rem-lbl{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px}
+.sum-rem{background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:2;min-height:40px;white-space:pre-wrap;word-break:break-word;transition:background .3s}
+.sum-rem.empty{color:var(--text3)}
+.action-btn{width:100%;margin-top:8px;padding:11px;background:transparent;border:1px solid var(--line2);border-radius:8px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.action-btn:hover,.action-btn:active{border-color:var(--red);color:var(--red)}
+.action-btn.copied{border-color:var(--green)!important;color:var(--green)!important}
+
+/* ══ PRICE MODAL ══ */
+.price-modal{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);padding:16px}
+.price-modal.show{display:flex;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.pm-box{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;padding:22px 20px;width:100%;max-width:380px;box-shadow:var(--shadow);position:relative;animation:popUp .2s cubic-bezier(.22,.68,0,1.2)}
+@keyframes popUp{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.pm-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;transition:color .15s;padding:4px}
+.pm-close:hover{color:var(--red)}
+.pm-type{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);font-weight:700;font-family:var(--head);margin-bottom:6px}
+.pm-route{font-family:var(--head);font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pm-price-row{background:var(--bg3);border-radius:9px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:baseline;gap:8px;border:1px solid var(--line)}
+.pm-currency{font-size:13px;color:var(--text2);font-family:var(--mono)}
+.pm-amount{font-family:var(--mono);font-size:34px;font-weight:500;color:var(--blue)}
+.pm-unit{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.pm-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.pm-item{background:var(--bg3);border-radius:6px;padding:8px 10px;border:1px solid var(--line)}
+.pm-item-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:3px}
+.pm-item-val{font-family:var(--mono);font-size:12px;font-weight:500}
+.pm-note{font-size:11px;color:var(--text2);padding:9px 11px;background:var(--bg3);border-radius:6px;border:1px solid var(--line);line-height:2;white-space:pre-wrap;word-break:break-word}
+
+/* ══ COMPARE VIEW ══ */
+.cmp-wrap{flex:1;overflow:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.cmp-title{font-family:var(--head);font-size:16px;font-weight:700;margin-bottom:10px}
+.cmp-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.cmp-table-wrap{background:var(--bg2);border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow-x:auto}
+.cmp-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.cmp-tbl th{padding:9px 12px;background:var(--bg3);font-size:8px;text-transform:uppercase;letter-spacing:.9px;color:var(--text2);font-weight:700;font-family:var(--head);border-bottom:1px solid var(--line2);text-align:left;white-space:nowrap}
+.cmp-tbl td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.cmp-tbl tr:last-child td{border-bottom:none}
+.cmp-tbl td.price{font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:500}
+.cmp-tbl td.price.best{color:var(--green);font-weight:700}
+.cmp-tbl td.price.nil{color:var(--text3)}
+.cmp-tbl td.price.hi{color:var(--amber)}
+.best-tag{display:inline-block;font-size:8px;padding:1px 5px;background:var(--green-s);color:var(--green);border-radius:3px;font-family:var(--mono);font-weight:700;margin-left:4px;border:1px solid rgba(25,196,122,.2)}
+.cmp-empty{padding:40px;text-align:center;color:var(--text3);font-size:12px}
+
+/* ══ HISTORY VIEW ══ */
+.hist-wrap{flex:1;overflow:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.hist-title{font-family:var(--head);font-size:16px;font-weight:700;margin-bottom:14px}
+.hist-item{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hist-item:hover,.hist-item:active{border-color:var(--line2);background:var(--bg3)}
+.hist-route{font-family:var(--head);font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.hist-pol{color:var(--teal)}.hist-arr{color:var(--red)}.hist-pod{color:var(--text)}
+.hist-meta{font-size:10px;color:var(--text2)}
+.hist-time{font-family:var(--mono);font-size:9px;color:var(--text3)}
+.hist-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px 8px;border-radius:4px;font-size:13px;transition:color .15s;flex-shrink:0}
+.hist-del:hover,.hist-del:active{color:var(--red2)}
+.hist-empty{padding:40px;text-align:center;color:var(--text3);font-size:12px}
+
+/* ══ PRINT ══ */
+@media print{
+  body *{visibility:hidden}
+  #print-area,#print-area *{visibility:visible}
+  #print-area{position:fixed;inset:0;background:#fff;color:#000;font-family:'DM Sans',sans-serif;padding:28px;font-size:12px;z-index:9999}
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:3px}
+
+/* ══════════════════════════════════════
+   MOBILE RESPONSIVE
+══════════════════════════════════════ */
+@media(max-width:768px){
+  :root{--panel-w:100%}
+
+  /* Header compact */
+  .brand-sub{display:none}
+  .theme-picker{display:none}
+  #hdr-time{display:none}
+  #refresh-cd{display:none!important}
+  .hdr-r .btn-ghost{display:none}
+
+  /* Hide desktop nav, show mobile nav */
+  .nav-tabs{display:none}
+  .mobile-nav{display:flex}
+
+  /* Shell height accounts for bottom nav */
+  .shell{height:calc(100vh - 54px - var(--bottom-bar))}
+  .panel{top:54px;height:calc(100vh - 54px - var(--bottom-bar))}
+
+  /* Panel becomes bottom sheet on mobile */
+  .panel{
+    top:auto;bottom:var(--bottom-bar);right:0;left:0;
+    width:100%;height:85vh;
+    transform:translateY(100%);
+    border-left:none;border-top:1px solid var(--line2);
+    border-radius:16px 16px 0 0;
+  }
+  .panel.open{transform:translateY(0)}
+  .shell.open .left{margin-right:0}
+
+  /* Panel drag handle */
+  .p-hero::before{
+    content:'';display:block;width:36px;height:4px;
+    background:var(--line2);border-radius:2px;
+    margin:0 auto 12px;
+  }
+
+  /* Hide table, show cards on mobile */
+  .tbl-wrap{display:none}
+  .card-list{display:flex;flex-direction:column;padding-bottom:8px}
+
+  /* Filters collapse */
+  .filter-toggle{display:block}
+  .filter-content{display:none}
+  .filter-content.open{display:flex;flex-wrap:wrap;gap:8px}
+  .fg input,.fg select{font-size:16px} /* prevent zoom on iOS */
+
+  /* Stats scroll horizontal */
+  .stats{flex-wrap:nowrap}
+  .st{min-width:70px;padding:6px 10px}
+  .st-val{font-size:16px}
+
+  /* Compare/History full width */
+  .cmp-wrap,.hist-wrap{padding:10px}
+
+  /* Rates grid 1 col on small screen */
+  .rates-grid{grid-template-columns:1fr}
+  .rc.span2{grid-column:span 1}
+  .ft-row{grid-template-columns:1fr 1fr}
+  .sum-grid{grid-template-columns:1fr 1fr}
+  .pm-grid{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:380px){
+  .card-prices{grid-template-columns:1fr 1fr}
+  .ft-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body data-theme="dark">
+
+<div id="print-area" style="display:none"></div>
+
+<!-- LOCK -->
+<div id="lock">
+  <div class="lock-box">
+    <div class="lock-ico"><span style="position:relative;z-index:1;font-family:monospace;font-size:13px;font-weight:700">NYL</span></div>
+    <div class="lock-title">Ocean Freight Rates</div>
+    <div class="lock-sub">Namyong Logistics</div>
+    <input id="pin" type="password" placeholder="••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')checkPin()">
+    <div id="pin-err"></div>
+    <button class="lock-btn" onclick="checkPin()">เข้าสู่ระบบ</button>
+    <div class="lock-hint">สำหรับพนักงาน NYL เท่านั้น</div>
+  </div>
+</div>
+
+<div id="offline-bar">⚠ ไม่มีการเชื่อมต่อ — ข้อมูลอาจไม่ใช่ล่าสุด</div>
+<div id="toast"></div>
+
+<!-- PRICE MODAL -->
+<div class="price-modal" id="price-modal" onclick="if(event.target===this)closePM()">
+  <div class="pm-box">
+    <button class="pm-close" onclick="closePM()">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="pm-type" id="pm-type">–</div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <div style="width:20px;height:20px;background:var(--red);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:8px;font-weight:700;color:#fff">NYL</div>
+        <span style="font-size:9px;color:var(--text3)">Namyong</span>
+      </div>
+    </div>
+    <div class="pm-route"><span style="color:var(--teal)" id="pm-pol">–</span><span style="color:var(--red)">→</span><span id="pm-pod">–</span></div>
+    <div class="pm-price-row">
+      <span class="pm-currency">USD</span>
+      <span class="pm-amount" id="pm-amount">–</span>
+      <span class="pm-unit">/ <span id="pm-ctype">Container</span></span>
+    </div>
+    <div class="pm-grid" id="pm-grid"></div>
+    <div class="pm-note" id="pm-note"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header id="main-header">
+  <div class="brand">
+    <div class="brand-icon">NYL</div>
+    <div>
+      <div class="brand-name">Ocean Freight Rates</div>
+      <div class="brand-sub">Namyong Logistics Company Limited</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="theme-picker">
+      <button class="th-btn th-dark active" title="Dark" onclick="setTheme('dark',this)"></button>
+      <button class="th-btn th-light" title="Light" onclick="setTheme('light',this)"></button>
+      <button class="th-btn th-navy" title="Navy" onclick="setTheme('navy',this)"></button>
+      <button class="th-btn th-sand" title="Sand" onclick="setTheme('sand',this)"></button>
+    </div>
+    <div id="hdr-status"><span class="dot" id="dot"></span><span id="dot-txt">–</span></div>
+    <div id="hdr-time"></div>
+    <div id="refresh-cd">↻ <span id="cd-val">30:00</span></div>
+    <button class="btn btn-ghost btn-sm" onclick="manualReload()">↻</button>
+  </div>
+</header>
+
+<!-- DESKTOP NAV -->
+<div class="nav-tabs">
+  <button class="nav-tab on" onclick="switchView('main',this)">📋 ตารางราคา</button>
+  <button class="nav-tab" onclick="switchView('compare',this)">⚖ เปรียบเทียบ</button>
+  <button class="nav-tab" onclick="switchView('history',this)">🕐 ประวัติ</button>
+</div>
+
+<!-- SHELL -->
+<div class="shell" id="shell">
+  <div class="left">
+
+    <!-- ══ MAIN VIEW ══ -->
+    <div class="view on" id="view-main">
+      <div class="stats">
+        <div class="st"><div class="st-lbl">Routes</div><div class="st-val" id="s-total">–</div></div>
+        <div class="st"><div class="st-lbl">Showing</div><div class="st-val" id="s-show">–</div></div>
+        <div class="st"><div class="st-lbl">Countries</div><div class="st-val" id="s-ctry">–</div></div>
+        <div class="st"><div class="st-lbl">Carriers</div><div class="st-val" id="s-carr">–</div></div>
+        <div class="st"><div class="st-lbl">Avg 20'GP</div><div class="st-val" id="s-avg">–</div></div>
+      </div>
+      <div class="filters">
+        <button class="filter-toggle" onclick="toggleFilter(this)">🔍 Filter ข้อมูล</button>
+        <div class="filter-content" id="filter-content">
+          <div class="filter-row">
+            <div class="fg"><label>Country</label><input id="f-ctry" placeholder="Japan…" oninput="doFilter()"></div>
+            <div class="fg"><label>Zone</label><select id="f-zone" onchange="doFilter()"><option value="">ทั้งหมด</option></select></div>
+            <div class="fg"><label>Carrier</label><select id="f-carr" onchange="doFilter()"><option value="">ทั้งหมด</option></select></div>
+            <div class="fg"><label>POL</label><select id="f-pol" onchange="doFilter()"><option value="">ทั้งหมด</option></select></div>
+            <div class="fg"><label>POD</label><input id="f-pod" placeholder="TOKYO…" oninput="doFilter()"></div>
+            <div class="fg"><label>Routing</label><select id="f-ts" onchange="doFilter()"><option value="">ทั้งหมด</option><option value="direct">Direct</option><option value="ts">T/S</option></select></div>
+            <div class="fg"><label>Service</label><input id="f-svc" placeholder="CTX1…" oninput="doFilter()"></div>
+            <div class="fa">
+              <button class="btn btn-ghost btn-sm" onclick="resetF()">Reset</button>
+              <button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Desktop table -->
+      <div class="tbl-wrap" id="tbl-wrap">
+        <div class="state-box"><div class="spinner"></div><p>กำลังโหลด…</p></div>
+      </div>
+      <!-- Mobile cards -->
+      <div class="card-list" id="card-list"></div>
+    </div>
+
+    <!-- ══ COMPARE VIEW ══ -->
+    <div class="view" id="view-compare">
+      <div class="cmp-wrap">
+        <div class="cmp-title">⚖ เปรียบเทียบราคา Carrier</div>
+        <div class="cmp-filters">
+          <div class="fg"><label>POD</label><input id="cmp-pod" placeholder="TOKYO, SHANGHAI…" oninput="renderCompare()"></div>
+          <div class="fg"><label>POL</label><select id="cmp-pol" onchange="renderCompare()"><option value="">ทั้งหมด</option></select></div>
+          <div class="fg"><label>Container</label>
+            <select id="cmp-col" onchange="renderCompare()">
+              <option value="20'GP (USD)">20' GP</option>
+              <option value="40'GP (USD)">40' GP</option>
+              <option value="40'HC">40' HC</option>
+              <option value="20'RF">20' RF</option>
+              <option value="40'RF">40' RF</option>
+            </select>
+          </div>
+        </div>
+        <div class="cmp-table-wrap" id="cmp-result"><div class="cmp-empty">พิมพ์ชื่อ POD เพื่อเปรียบเทียบ</div></div>
+      </div>
+    </div>
+
+    <!-- ══ HISTORY VIEW ══ -->
+    <div class="view" id="view-history">
+      <div class="hist-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div class="hist-title">🕐 ประวัติการดู</div>
+          <button class="btn btn-ghost btn-sm" onclick="clearHistory()">ล้าง</button>
+        </div>
+        <div id="hist-list"><div class="hist-empty">ยังไม่มีประวัติ</div></div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- DETAIL PANEL -->
+  <div class="panel" id="panel">
+    <div class="p-hero">
+      <div class="p-top">
+        <div>
+          <div class="p-route-title"><span class="p-pol" id="p-pol">–</span><span class="p-arr">→</span><span class="p-pod" id="p-pod">–</span></div>
+          <div class="p-meta"><span class="p-carrier" id="p-carrier">–</span><span class="p-sep">·</span><span class="p-country" id="p-country">–</span></div>
+        </div>
+        <button class="close-btn" onclick="closePanel()">✕</button>
+      </div>
+    </div>
+    <div class="p-tabs">
+      <button class="tab on" data-tab="rates" onclick="switchTab('rates',this)">💰 Rates</button>
+      <button class="tab" data-tab="route" onclick="switchTab('route',this)">🗺 Route</button>
+      <button class="tab" data-tab="summary" onclick="switchTab('summary',this)">📋 Summary</button>
+    </div>
+    <div class="p-body">
+      <div class="pane on" id="pane-rates">
+        <div class="sec"><div class="sec-ttl">Rates (USD) — คลิกเพื่อดูรายละเอียด</div><div class="rates-grid" id="rates-grid"></div></div>
+        <div class="sec"><div class="sec-ttl">Additional Info</div><div class="ft-row" id="ft-row"></div></div>
+      </div>
+      <div class="pane" id="pane-route">
+        <div class="sec"><div class="sec-ttl">Route Details</div><div id="route-info"></div></div>
+        <div class="sec"><div class="sec-ttl">Transit Time</div>
+          <div class="tt-vis"><div class="tt-lbl">Estimated Duration</div><div class="tt-bar"><div class="tt-fill" id="tt-fill" style="width:0%"></div></div><div class="tt-scale"><span>1 day</span><span id="tt-mid">–</span><span>30+ days</span></div></div>
+        </div>
+        <div class="sec"><div class="sec-ttl">Validity</div><div class="vblock"><div class="vb-lbl">Rate Valid</div><div class="vb-val" id="vb-val">–</div></div></div>
+        <div class="sec" id="rem-sec" style="display:none"><div class="sec-ttl">Remark</div><div class="remark-box" id="rem-box"></div></div>
+      </div>
+      <div class="pane" id="pane-summary">
+        <div class="sum-card">
+          <div class="sum-route"><span style="color:var(--teal)" id="sum-pol">–</span><span style="color:var(--red)">→</span><span id="sum-pod">–</span></div>
+          <div class="sum-grid" id="sum-grid"></div>
+          <div class="sum-rem-lbl">Remark / Condition</div>
+          <div class="sum-rem empty" id="sum-rem">–</div>
+          <button class="action-btn" id="copy-btn" onclick="copyQuote()">📋 Copy Quote</button>
+          <button class="action-btn" onclick="shareRoute()">🔗 Copy Link</button>
+          <button class="action-btn" onclick="printRoute()">🖨 Print / PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /shell -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <button class="mob-nav-btn on" onclick="switchView('main',this)" data-view="main">
+    <span class="mob-nav-ico">📋</span>ราคา
+  </button>
+  <button class="mob-nav-btn" onclick="switchView('compare',this)" data-view="compare">
+    <span class="mob-nav-ico">⚖</span>เปรียบเทียบ
+  </button>
+  <button class="mob-nav-btn" onclick="switchView('history',this)" data-view="history">
+    <span class="mob-nav-ico">🕐</span>ประวัติ
+  </button>
+  <button class="mob-nav-btn" onclick="manualReload()">
+    <span class="mob-nav-ico">↻</span>Reload
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const API_URL='https://script.google.com/macros/s/AKfycby3BNT1FR08oshHGPz9rs39axlEwLtKFQ1j13ePcYso7OrylLwzQsn56AunU8V8hmyC-w/exec';
+const PASSCODE='pricingnyl2026';
+const REFRESH_MIN=30;
+const MAX_HIST=5;
+const IS_MOBILE=()=>window.innerWidth<=768;
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let allData=[],headers=[],filteredData=[],apiUrl='';
+let sortColIdx=-1,sortDir=1,currentRow=null;
+let keyMap={},PRICE_COLS=[];
+const PRICE_COLS_NORM=["20'GP (USD)","40'GP (USD)","40'HC","20'RF","40'RF"];
+const PRICE_LABELS={"20'GP (USD)":"20' GP","40'GP (USD)":"40' GP","40'HC":"40' HC","20'RF":"20' RF","40'RF":"40' RF"};
+const FIELD_ALIAS={
+  "Zone":        ["Zone","ZONE","zone"],
+  "Country":     ["Country","COUNTRY"],
+  "Carrier":     ["Carrier","CARRIER"],
+  "POL":         ["POL"],"POD":["POD"],
+  "20'GP (USD)": ["20'GP (USD)","20'GP(USD)","20' GP (USD)","20GP USD","20'GP"],
+  "40'GP (USD)": ["40'GP (USD)","40'GP(USD)","40' GP (USD)","40GP USD","40'GP"],
+  "40'HC":       ["40'HC","40' HC","40HC"],
+  "20'RF":       ["20'RF","20' RF","20RF"],
+  "40'RF":       ["40'RF","40' RF","40RF"],
+  "T/T":         ["T/T","TT","Transit Time"],
+  "T/S":         ["T/S","TS","Transshipment","Routing","ROUTING"],
+  "Freetime":    ["Freetime","Free Time"],
+  "Validity":    ["Validity"],"Service":["Service"],
+  "Remark":      ["Remark","Remarks"],
+};
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+const norm=s=>String(s||'').replace(/[\r\n\t]+/g,' ').replace(/\s+/g,' ').trim();
+const eh=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const g=id=>document.getElementById(id)?.value?.trim()||'';
+const isDirect=ts=>!ts||ts.toLowerCase()==='direct';
+function isNilVal(v){if(!v)return true;const s=String(v).trim();return s===''||s==='-'||s==='–'||s==='—'||s==='0'||s.toLowerCase()==='n/a'}
+function fmtPrice(v){
+  if(!v)return{display:'–',isNil:true};
+  const s=String(v).trim();
+  if(isNilVal(s))return{display:s||'–',isNil:true};
+  const n=parseFloat(s.replace(/[^0-9.]/g,''));
+  // ถ้าไม่ใช่ตัวเลข → แสดงข้อความตามจริง ไม่ใส่ USD
+  if(isNaN(n))return{display:s,isNil:false,isText:true};
+  return{display:n.toLocaleString(),isNil:false,num:n};
+}
+const fp=v=>{const p=fmtPrice(v);if(p.isNil)return'N/A';if(p.isText)return p.display;return'USD '+p.display};
+const fmtRemark=s=>(!s||s==='-')?'–':s.replace(/\r\n|\r/g,'\n').trim();
+function validityDaysLeft(v){
+  if(!v||v==='-')return null;
+  const m=v.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+  if(!m)return null;
+  const d=new Date(`${m[2]} ${m[1]}, ${m[3]}`);
+  return isNaN(d)?null:Math.ceil((d-Date.now())/(1000*60*60*24));
+}
+function fuzzy(str,q){
+  if(!q)return true;str=str.toLowerCase();q=q.toLowerCase();
+  if(str.includes(q))return true;
+  let si=0;for(let qi=0;qi<q.length;qi++){si=str.indexOf(q[qi],si);if(si===-1)return false;si++}return true;
+}
+
+function buildKeyMap(raw){
+  keyMap={};
+  const nh=raw.map(h=>({raw:h,n:norm(h).toLowerCase()}));
+  for(const [c,aliases] of Object.entries(FIELD_ALIAS)){
+    for(const a of aliases){
+      const an=norm(a).toLowerCase();
+      const found=nh.find(h=>h.n===an||h.n.replace(/\s/g,'')===an.replace(/\s/g,''));
+      if(found){keyMap[c]=found.raw;break}
+    }
+  }
+  PRICE_COLS=PRICE_COLS_NORM.map(p=>keyMap[p]).filter(Boolean);
+  console.log('[NYL] keyMap:',JSON.stringify(keyMap));
+}
+function rv(row,canon){
+  const k=keyMap[canon];
+  if(k&&row[k]!==undefined)return row[k]||'';
+  if(row[canon]!==undefined)return row[canon]||'';
+  const cn=norm(canon).toLowerCase();
+  for(const key of Object.keys(row))if(norm(key).toLowerCase()===cn)return row[key]||'';
+  for(const a of (FIELD_ALIAS[canon]||[])){
+    const an=norm(a).toLowerCase();
+    for(const key of Object.keys(row))if(norm(key).toLowerCase()===an)return row[key]||'';
+  }
+  return '';
+}
+
+// ═══════════════════════════════════════
+// PASSWORD
+// ═══════════════════════════════════════
+function checkPin(){
+  const inp=document.getElementById('pin');
+  const err=document.getElementById('pin-err');
+  if(inp.value===PASSCODE){
+    sessionStorage.setItem('nyl_auth','1');
+    const ls=document.getElementById('lock');
+    ls.style.opacity='0';ls.style.transition='opacity .3s';
+    setTimeout(()=>ls.style.display='none',300);
+  } else {
+    err.textContent='Passcode ไม่ถูกต้อง';
+    inp.value='';inp.style.borderColor='var(--red2)';
+    setTimeout(()=>inp.style.borderColor='var(--line)',1500);inp.focus();
+  }
+}
+function initAuth(){
+  if(sessionStorage.getItem('nyl_auth')==='1')document.getElementById('lock').style.display='none';
+  else setTimeout(()=>document.getElementById('pin').focus(),100);
+}
+
+// ═══════════════════════════════════════
+// AUTO-REFRESH
+// ═══════════════════════════════════════
+let cdSec=REFRESH_MIN*60,cdTimer=null;
+function startAutoRefresh(){
+  clearInterval(cdTimer);cdSec=REFRESH_MIN*60;updateCD();
+  document.getElementById('refresh-cd').style.display='flex';
+  cdTimer=setInterval(()=>{cdSec--;updateCD();if(cdSec<=0){cdSec=REFRESH_MIN*60;showToast('🔄 กำลังอัพเดต…');silentReload()}},1000);
+}
+function updateCD(){const m=Math.floor(cdSec/60),s=cdSec%60;document.getElementById('cd-val').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+async function silentReload(){
+  try{
+    const r=await fetch(apiUrl,{cache:'no-store'});if(!r.ok)return;
+    const j=await r.json();if(!j.success)return;
+    allData=j.data||[];headers=j.headers||(allData.length?Object.keys(allData[0]):[]);
+    buildKeyMap(headers);populateDDs();doFilter();calcStats();setStatus('on');
+    document.getElementById('hdr-time').textContent='อัพเดต '+new Date().toLocaleTimeString('th-TH');
+    showToast('✓ อัพเดตเรียบร้อย');
+  }catch(e){}
+}
+function manualReload(){cdSec=REFRESH_MIN*60;updateCD();apiUrl=API_URL;showLoading();loadData()}
+
+// ═══════════════════════════════════════
+// OFFLINE
+// ═══════════════════════════════════════
+function updateOnline(){
+  const bar=document.getElementById('offline-bar'),hdr=document.getElementById('main-header');
+  if(navigator.onLine){bar.style.display='none';hdr.style.top='0'}
+  else{bar.style.display='block';hdr.style.top='37px'}
+}
+window.addEventListener('online',()=>{updateOnline();showToast('📶 เชื่อมต่อแล้ว');setTimeout(silentReload,1000)});
+window.addEventListener('offline',updateOnline);
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+let toastT=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';t.style.opacity='1';
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.style.display='none',300)},3000);
+}
+
+// ═══════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════
+function setTheme(t,btn){
+  document.body.setAttribute('data-theme',t);localStorage.setItem('nyl_theme',t);
+  document.querySelectorAll('.th-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// FILTER TOGGLE (mobile)
+// ═══════════════════════════════════════
+function toggleFilter(btn){
+  const fc=document.getElementById('filter-content');
+  fc.classList.toggle('open');
+  btn.textContent=fc.classList.contains('open')?'✕ ปิด Filter':'🔍 Filter ข้อมูล';
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.onload=()=>{
+  initAuth();
+  const th=localStorage.getItem('nyl_theme')||'dark';
+  document.body.setAttribute('data-theme',th);
+  document.querySelectorAll('.th-btn').forEach(b=>{if(b.title.toLowerCase()===th)b.classList.add('active');else b.classList.remove('active')});
+  updateOnline();
+  apiUrl=API_URL;loadData();startAutoRefresh();
+  renderHistory();applyURLParams();
+  // On desktop, show filters by default
+  if(!IS_MOBILE()){
+    const fc=document.getElementById('filter-content');
+    if(fc)fc.classList.add('open');
+  }
+};
+
+// ═══════════════════════════════════════
+// LOAD DATA
+// ═══════════════════════════════════════
+async function loadData(){
+  if(!apiUrl)return;setStatus('load');
+  try{
+    const r=await fetch(apiUrl,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();if(!j.success)throw new Error(j.error||'API error');
+    allData=j.data||[];headers=j.headers||(allData.length?Object.keys(allData[0]):[]);
+    buildKeyMap(headers);populateDDs();doFilter();calcStats();setStatus('on');
+    document.getElementById('hdr-time').textContent='อัพเดต '+new Date().toLocaleTimeString('th-TH');
+    populateCmpDDs();
+  }catch(e){setStatus('err');showErr(e.message)}
+}
+
+// ═══════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════
+function populateDDs(){
+  const zone=[...new Set(allData.map(r=>rv(r,'Zone')).filter(Boolean))].sort();
+  const carr=[...new Set(allData.map(r=>rv(r,'Carrier')).filter(Boolean))].sort();
+  const pol=[...new Set(allData.map(r=>rv(r,'POL')).filter(Boolean))].sort();
+  fillSel('f-zone',zone);fillSel('f-carr',carr);fillSel('f-pol',pol);
+}
+function fillSel(id,opts){
+  const el=document.getElementById(id);if(!el)return;
+  const cur=el.value;
+  el.innerHTML='<option value="">ทั้งหมด</option>'+opts.map(o=>`<option>${o}</option>`).join('');
+  if(opts.includes(cur))el.value=cur;
+}
+function doFilter(){
+  const c=g('f-ctry'),zn=g('f-zone'),cr=g('f-carr'),pl=g('f-pol'),pd=g('f-pod'),ts=g('f-ts'),sv=g('f-svc').toLowerCase();
+  filteredData=allData.filter(r=>{
+    if(c&&!fuzzy(rv(r,'Country')||'',c))return false;
+    if(zn&&rv(r,'Zone')!==zn)return false;
+    if(cr&&rv(r,'Carrier')!==cr)return false;
+    if(pl&&rv(r,'POL')!==pl)return false;
+    if(pd&&!fuzzy(rv(r,'POD')||'',pd))return false;
+    const tv=(rv(r,'T/S')||'').trim().toLowerCase();
+    if(ts==='direct'&&tv!==''&&tv!=='direct')return false;
+    if(ts==='ts'&&(tv===''||tv==='direct'))return false;
+    if(sv&&!(rv(r,'Service')||'').toLowerCase().includes(sv))return false;
+    return true;
+  });
+  if(sortColIdx>=0)doSort();
+  renderTable();renderCards();
+  document.getElementById('s-show').textContent=filteredData.length;
+}
+function resetF(){
+  ['f-ctry','f-pod','f-svc'].forEach(i=>{const el=document.getElementById(i);if(el)el.value=''});
+  ['f-zone','f-carr','f-pol','f-ts'].forEach(i=>{const el=document.getElementById(i);if(el)el.value=''});
+  doFilter();
+}
+
+// ═══════════════════════════════════════
+// SORT
+// ═══════════════════════════════════════
+function sortBy(idx){idx=parseInt(idx);if(sortColIdx===idx)sortDir*=-1;else{sortColIdx=idx;sortDir=1}doSort();renderTable();renderCards()}
+function doSort(){
+  if(sortColIdx<0||!headers[sortColIdx])return;
+  const key=headers[sortColIdx];
+  filteredData.sort((a,b)=>{
+    const va=String(a[key]||'').trim(),vb=String(b[key]||'').trim();
+    const ae=va===''||va==='-'||va==='–',be=vb===''||vb==='-'||vb==='–';
+    if(ae&&be)return 0;if(ae)return 1;if(be)return -1;
+    const na=parseFloat(va.replace(/[^0-9.]/g,'')),nb=parseFloat(vb.replace(/[^0-9.]/g,''));
+    if(!isNaN(na)&&!isNaN(nb))return(na-nb)*sortDir;
+    return va.localeCompare(vb)*sortDir;
+  });
+}
+
+// ═══════════════════════════════════════
+// BEST PRICE MAP
+// ═══════════════════════════════════════
+function getBest20Map(){
+  const best={};
+  filteredData.forEach(r=>{
+    const pod=rv(r,'POD').trim(),p=fmtPrice(rv(r,"20'GP (USD)"));
+    if(pod&&!p.isNil&&!p.isText&&p.num>0)best[pod]=(best[pod]===undefined||p.num<best[pod])?p.num:best[pod];
+  });
+  return best;
+}
+
+// ═══════════════════════════════════════
+// RENDER TABLE (desktop)
+// ═══════════════════════════════════════
+function renderTable(){
+  const wrap=document.getElementById('tbl-wrap');
+  if(!filteredData.length){
+    wrap.innerHTML=`<div class="state-box"><span class="ico">🔍</span><p>ไม่พบข้อมูล</p><small>ลองปรับ filter</small><br><br><button onclick="resetF()" style="margin-top:8px;padding:7px 18px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer">Reset Filter</button></div>`;
+    return;
+  }
+  const HDR={[keyMap["T/S"]||"T/S"]:"ROUTING"};
+  const best20=getBest20Map();
+  const thead=headers.map((h,i)=>{
+    const cls=sortColIdx===i?(sortDir===1?'asc':'desc'):'';
+    return`<th class="${cls}${PRICE_COLS.includes(h)?' th-price':''}" onclick="sortBy(${i})">${HDR[h]||h}</th>`;
+  }).join('');
+  const tbody=filteredData.map((row,i)=>{
+    const vs=rv(row,'Validity'),dl=validityDaysLeft(vs);
+    const rowExp=dl!==null&&dl<=7?'row-expiring':'';
+    const pod=rv(row,'POD').trim(),gp20p=fmtPrice(rv(row,"20'GP (USD)"));
+    const isBest=!gp20p.isNil&&!gp20p.isText&&gp20p.num>0&&best20[pod]===gp20p.num;
+    const cells=headers.map(h=>{
+      const v=row[h]||'';
+      if(PRICE_COLS.includes(h)){
+        const p=fmtPrice(v);const hi=!p.isNil&&!p.isText&&p.num>800;
+        const cls='c-num'+(p.isNil?' nil':p.isText?' text-val':hi?' hi':'');
+        if(p.isNil)return`<td class="${cls}" onclick="event.stopPropagation()">–</td>`;
+        if(p.isText)return`<td class="c-num text-val" onclick="event.stopPropagation()">${p.display}</td>`;
+        return`<td class="${cls}" onclick="event.stopPropagation();openPriceModal(event,filteredData[${i}],'${h.replace(/'/g,"\\'")}')"><span class="usd-tag">USD</span>${p.display}</td>`;
+      }
+      if(h===keyMap['T/S']){const ts=(v||'').trim();const d=isDirect(ts);return`<td>${d?`<span class="badge b-direct">Direct</span>`:`<span class="badge b-ts">${eh(ts)}</span>`}</td>`}
+      if(h===keyMap['POL']||h===keyMap['POD'])return`<td class="c-port" title="${eh(v)}">${eh(v)||'–'}</td>`;
+      if(h===keyMap['T/T'])return`<td class="c-tt">${eh(v)||'–'}</td>`;
+      if(h===keyMap['Freetime'])return`<td class="c-valid">${eh(v)||'–'}</td>`;
+      if(h===keyMap['Validity']){
+        const dl2=validityDaysLeft(v);
+        const tag=dl2!==null&&dl2<=0?` <span class="val-badge val-expired">หมด</span>`:dl2!==null&&dl2<=7?` <span class="val-badge val-warn">⚠${dl2}d</span>`:'';
+        return`<td class="c-valid">${eh(v)||'–'}${tag}</td>`;
+      }
+      if(h===keyMap['Service'])return`<td class="c-svc">${eh(v)||'–'}</td>`;
+      if(h===keyMap['Remark'])return`<td class="c-remark" title="${eh(v)}">${eh(v)||'–'}</td>`;
+      if(h===keyMap['Carrier'])return`<td class="c-carrier">${eh(v)||'–'}</td>`;
+      return`<td title="${eh(v)}">${eh(v)||'–'}</td>`;
+    }).join('');
+    const act=currentRow&&currentRow._idx===i?'active':'';
+    return`<tr class="${[act,rowExp,isBest?'row-best':''].filter(Boolean).join(' ')}" onclick="openPanel(filteredData[${i}],${i},this)">${cells}</tr>`;
+  }).join('');
+  wrap.innerHTML=`<table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════
+// RENDER CARDS (mobile)
+// ═══════════════════════════════════════
+function renderCards(){
+  const list=document.getElementById('card-list');
+  if(!list)return;
+  if(!filteredData.length){
+    list.innerHTML=`<div class="state-box"><span class="ico">🔍</span><p>ไม่พบข้อมูล</p><br><button onclick="resetF()" style="padding:8px 20px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer">Reset Filter</button></div>`;
+    return;
+  }
+  const best20=getBest20Map();
+  list.innerHTML=filteredData.map((row,i)=>{
+    const ts=(rv(row,'T/S')||'').trim(),dr=isDirect(ts);
+    const vs=rv(row,'Validity'),dl=validityDaysLeft(vs);
+    const pod=rv(row,'POD').trim(),gp20p=fmtPrice(rv(row,"20'GP (USD)"));
+    const isBest=!gp20p.isNil&&!gp20p.isText&&gp20p.num>0&&best20[pod]===gp20p.num;
+    const isExp=dl!==null&&dl<=7;
+
+    const prices=[
+      {l:"20'GP",c:"20'GP (USD)"},{l:"40'GP",c:"40'GP (USD)"},{l:"40'HC",c:"40'HC"},
+    ].map(p=>{
+      const pv=fmtPrice(rv(row,p.c));
+      const hi=!pv.isNil&&!pv.isText&&pv.num>800;
+      return`<div class="card-price-item">
+        <div class="card-price-lbl">${p.l}</div>
+        <div class="card-price-val ${pv.isNil?'nil':isBest&&p.c==="20'GP (USD)"?'best':hi?'hi':''}">${pv.isNil?'–':pv.isText?pv.display:'USD '+pv.display}</div>
+      </div>`;
+    }).join('');
+
+    return`<div class="rate-card ${isBest?'row-best':''} ${isExp?'row-expiring':''}" onclick="openPanel(filteredData[${i}],${i},null)">
+      <div class="card-top">
+        <div class="card-route">
+          <span class="card-pol">${eh(rv(row,'POL'))}</span>
+          <span class="card-arr">→</span>
+          <span class="card-pod">${eh(rv(row,'POD'))}</span>
+        </div>
+        <div class="card-badge-wrap">
+          ${dr?'<span class="badge b-direct">Direct</span>':`<span class="badge b-ts">${eh(ts)}</span>`}
+          ${isExp&&dl>0?`<span class="val-badge val-warn">⚠${dl}d</span>`:''}
+          ${dl!==null&&dl<=0?'<span class="val-badge val-expired">หมด</span>':''}
+        </div>
+      </div>
+      <div class="card-meta">
+        <span class="card-meta-item"><strong>${eh(rv(row,'Carrier'))}</strong></span>
+        <span class="card-meta-item">${eh(rv(row,'Country'))}</span>
+        ${rv(row,'Zone')?`<span class="card-meta-item">${eh(rv(row,'Zone'))}</span>`:''}
+        <span class="card-meta-item" style="color:var(--amber)">${eh(rv(row,'T/T'))||'–'}</span>
+      </div>
+      <div class="card-prices">${prices}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function calcStats(){
+  document.getElementById('s-total').textContent=allData.length;
+  document.getElementById('s-ctry').textContent=new Set(allData.map(r=>rv(r,'Country')).filter(Boolean)).size;
+  document.getElementById('s-carr').textContent=new Set(allData.map(r=>rv(r,'Carrier')).filter(Boolean)).size;
+  const ps=allData.map(r=>{const p=fmtPrice(rv(r,"20'GP (USD)"));return(!p.isNil&&!p.isText)?p.num:null}).filter(n=>n!==null&&n>0);
+  document.getElementById('s-avg').textContent=ps.length?'$'+Math.round(ps.reduce((a,b)=>a+b,0)/ps.length).toLocaleString():'–';
+}
+
+// ═══════════════════════════════════════
+// COMPARE VIEW
+// ═══════════════════════════════════════
+function populateCmpDDs(){const pol=[...new Set(allData.map(r=>rv(r,'POL')).filter(Boolean))].sort();fillSel('cmp-pol',pol)}
+function renderCompare(){
+  const pod=g('cmp-pod'),pol=g('cmp-pol'),col=g('cmp-col'),el=document.getElementById('cmp-result');
+  if(!pod){el.innerHTML='<div class="cmp-empty">พิมพ์ชื่อ POD เพื่อเปรียบเทียบ</div>';return}
+  const rows=allData.filter(r=>(fuzzy(rv(r,'POD')||'',pod))&&(!pol||rv(r,'POL')===pol));
+  if(!rows.length){el.innerHTML='<div class="cmp-empty">ไม่พบ POD นี้</div>';return}
+  const pods=[...new Set(rows.map(r=>rv(r,'POD').trim()))].sort();
+  let html='';
+  pods.forEach(pn=>{
+    const pr=rows.filter(r=>rv(r,'POD').trim()===pn);
+    const prices=pr.map(r=>{const p=fmtPrice(rv(r,col));return(!p.isNil&&!p.isText)?p.num:null}).filter(n=>n!==null&&n>0);
+    const minP=prices.length?Math.min(...prices):null;
+    html+=`<div style="padding:8px 12px;font-size:10px;font-weight:700;font-family:var(--head);text-transform:uppercase;letter-spacing:.8px;color:var(--text2);border-bottom:1px solid var(--line);background:var(--bg3)">${pn}</div>`;
+    html+=`<table class="cmp-tbl"><thead><tr><th>Carrier</th><th>POL</th><th>Routing</th><th>T/T</th><th>${PRICE_LABELS[col]||col}</th><th>Validity</th></tr></thead><tbody>`;
+    pr.forEach(r=>{
+      const pp=fmtPrice(rv(r,col)),isBest=!pp.isNil&&!pp.isText&&pp.num===minP;
+      const ts=(rv(r,'T/S')||'').trim();
+      html+=`<tr>
+        <td><strong>${rv(r,'Carrier')||'–'}</strong></td>
+        <td class="c-port">${rv(r,'POL')||'–'}</td>
+        <td>${isDirect(ts)?'<span class="badge b-direct">Direct</span>':`<span class="badge b-ts">${eh(ts)}</span>`}</td>
+        <td class="c-tt">${rv(r,'T/T')||'–'}</td>
+        <td class="price${pp.isNil?' nil':isBest?' best':(!pp.isText&&pp.num>800)?' hi':''}">${pp.isNil?'–':pp.isText?pp.display:'USD '+pp.display}${isBest?'<span class="best-tag">BEST</span>':''}</td>
+        <td class="c-valid" style="font-size:10px">${rv(r,'Validity')||'–'}</td>
+      </tr>`;
+    });
+    html+='</tbody></table>';
+  });
+  el.innerHTML=html;
+}
+
+// ═══════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════
+function addHistory(row){
+  let h=JSON.parse(localStorage.getItem('nyl_hist')||'[]');
+  const e={pol:rv(row,'POL'),pod:rv(row,'POD'),carrier:rv(row,'Carrier'),country:rv(row,'Country'),ts:Date.now()};
+  h=h.filter(x=>!(x.pol===e.pol&&x.pod===e.pod&&x.carrier===e.carrier));
+  h.unshift(e);if(h.length>MAX_HIST)h=h.slice(0,MAX_HIST);
+  localStorage.setItem('nyl_hist',JSON.stringify(h));
+}
+function renderHistory(){
+  const h=JSON.parse(localStorage.getItem('nyl_hist')||'[]'),el=document.getElementById('hist-list');
+  if(!h.length){el.innerHTML='<div class="hist-empty">ยังไม่มีประวัติ<br><small>คลิก route เพื่อดูรายละเอียด</small></div>';return}
+  el.innerHTML=h.map((x,i)=>`
+    <div class="hist-item" onclick="openFromHistory(${i})">
+      <div>
+        <div class="hist-route"><span class="hist-pol">${x.pol||'–'}</span><span class="hist-arr">→</span><span class="hist-pod">${x.pod||'–'}</span></div>
+        <div class="hist-meta">${x.carrier||'–'} · ${x.country||'–'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="hist-time">${new Date(x.ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
+        <button class="hist-del" onclick="event.stopPropagation();delHistory(${i})">✕</button>
+      </div>
+    </div>`).join('');
+}
+function openFromHistory(i){
+  const h=JSON.parse(localStorage.getItem('nyl_hist')||'[]');if(!h[i])return;
+  switchView('main',document.querySelector(IS_MOBILE()?'.mob-nav-btn':'.nav-tab'));
+  const x=h[i];
+  const found=allData.find(r=>rv(r,'POL')===x.pol&&rv(r,'POD')===x.pod&&rv(r,'Carrier')===x.carrier);
+  if(found){const idx=allData.indexOf(found);setTimeout(()=>openPanel(found,idx,null),100)}
+  else showToast('ไม่พบข้อมูล อาจมีการอัพเดตแล้ว');
+}
+function delHistory(i){let h=JSON.parse(localStorage.getItem('nyl_hist')||'[]');h.splice(i,1);localStorage.setItem('nyl_hist',JSON.stringify(h));renderHistory()}
+function clearHistory(){localStorage.removeItem('nyl_hist');renderHistory()}
+
+// ═══════════════════════════════════════
+// PANEL
+// ═══════════════════════════════════════
+function openPanel(row,idx,tr){
+  currentRow={...row,_idx:idx};
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('active'));
+  if(tr)tr.classList.add('active');
+  document.getElementById('p-pol').textContent=rv(row,'POL')||'–';
+  document.getElementById('p-pod').textContent=rv(row,'POD')||'–';
+  document.getElementById('p-carrier').textContent=rv(row,'Carrier')||'–';
+  document.getElementById('p-country').textContent=rv(row,'Country')||'–';
+  buildRates(row);buildRoute(row);buildSummary(row);
+  document.getElementById('shell').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelector('[data-tab="rates"]').classList.add('on');
+  document.getElementById('pane-rates').classList.add('on');
+  addHistory(row);renderHistory();
+  // Scroll to top of panel body on mobile
+  if(IS_MOBILE())document.querySelector('.p-body').scrollTop=0;
+}
+function closePanel(){
+  document.getElementById('shell').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('active'));
+  currentRow=null;
+}
+
+// ═══════════════════════════════════════
+// BUILD PANEL
+// ═══════════════════════════════════════
+function buildRates(r){
+  const cfgs=[
+    {canon:"20'GP (USD)",lbl:"20' GP",cls:'blue',badge:'MOST COMMON',span:true},
+    {canon:"40'GP (USD)",lbl:"40' GP",cls:'blue',badge:'MOST COMMON',span:true},
+    {canon:"40'HC",lbl:"40' HC",cls:'teal',badge:'HIGH CUBE',span:false},
+    {canon:"20'RF",lbl:"20' RF",cls:'amber',badge:'REEFER',span:false},
+    {canon:"40'RF",lbl:"40' RF",cls:'amber',badge:'REEFER',span:false},
+  ];
+  document.getElementById('rates-grid').innerHTML=cfgs.map(c=>{
+    const v=rv(r,c.canon),ak=keyMap[c.canon]||c.canon,p=fmtPrice(v);
+    return`<div class="rc ${c.span?'span2':''} ${p.isNil||p.isText?'':'clickable'}" onclick="${p.isNil||p.isText?'':'openPriceModal(event,currentRow,\''+ak.replace(/'/g,"\\'")+'\')'}" >
+      ${c.badge?`<div class="rc-badge">${c.badge}</div>`:''}
+      <div class="rc-lbl">${c.lbl}</div>
+      <div class="rc-val ${p.isNil?'nil':c.cls}">${p.isNil?'N/A':p.isText?p.display:'USD '+p.display}</div>
+      <div class="rc-unit">${p.isNil?'ไม่มีอัตรานี้':'per '+c.lbl+' Container'}</div>
+      ${p.isNil||p.isText?'':`<div class="rc-tooltip">คลิกดูรายละเอียด</div>`}
+    </div>`;
+  }).join('');
+  document.getElementById('ft-row').innerHTML=`
+    <div class="ft"><div class="ft-lbl">Freetime</div><div class="ft-val" style="color:var(--amber)">${rv(r,'Freetime')||'–'}</div></div>
+    <div class="ft"><div class="ft-lbl">T/T</div><div class="ft-val" style="color:var(--teal)">${rv(r,'T/T')||'–'}</div></div>
+    <div class="ft"><div class="ft-lbl">Service</div><div class="ft-val" style="color:var(--purple)">${rv(r,'Service')||'–'}</div></div>`;
+}
+function buildRoute(r){
+  const ts=(rv(r,'T/S')||'').trim(),dr=isDirect(ts);
+  document.getElementById('route-info').innerHTML=`
+    <div class="info-row"><span class="ik">Country</span><span class="iv">${rv(r,'Country')||'–'}</span></div>
+    <div class="info-row"><span class="ik">Zone</span><span class="iv teal">${rv(r,'Zone')||'–'}</span></div>
+    <div class="info-row"><span class="ik">Carrier</span><span class="iv">${rv(r,'Carrier')||'–'}</span></div>
+    <div class="info-row"><span class="ik">POL</span><span class="iv teal mono">${rv(r,'POL')||'–'}</span></div>
+    <div class="info-row"><span class="ik">POD</span><span class="iv mono">${rv(r,'POD')||'–'}</span></div>
+    <div class="info-row"><span class="ik">Routing</span><span class="iv ${dr?'green':'amber'}">${dr?'Direct':ts}</span></div>
+    <div class="info-row"><span class="ik">Service</span><span class="iv purple">${rv(r,'Service')||'–'}</span></div>
+    <div class="info-row"><span class="ik">Freetime</span><span class="iv amber mono">${rv(r,'Freetime')||'–'}</span></div>`;
+  const tt=rv(r,'T/T')||'',ttN=(tt.match(/\d+/g)||[]).map(Number);
+  const ttMax=ttN.length?Math.max(...ttN):0,ttLbl=ttN.length>1?`${ttN[0]}–${ttN[ttN.length-1]} days`:ttN.length?`${ttN[0]} days`:'–';
+  document.getElementById('tt-fill').style.width=Math.min(100,Math.round((ttMax/30)*100))+'%';
+  document.getElementById('tt-mid').textContent=ttLbl;
+  document.getElementById('vb-val').textContent=rv(r,'Validity')||'–';
+  const rem=rv(r,'Remark')||'',rs=document.getElementById('rem-sec');
+  if(rem&&rem!=='-'){rs.style.display='block';document.getElementById('rem-box').textContent=fmtRemark(rem)}
+  else rs.style.display='none';
+}
+function buildSummary(r){
+  document.getElementById('sum-pol').textContent=rv(r,'POL')||'–';
+  document.getElementById('sum-pod').textContent=rv(r,'POD')||'–';
+  const ts=(rv(r,'T/S')||'').trim(),dr=isDirect(ts);
+  const vs=rv(r,'Validity'),dl=validityDaysLeft(vs);
+  const vDisp=vs+(dl!==null?(dl<=0?' (หมดแล้ว)':dl<=7?` (⚠ เหลือ ${dl} วัน)`:` (เหลือ ${dl} วัน)`):'');
+  const items=[
+    {l:'Carrier',v:rv(r,'Carrier')||'–',c:''},
+    {l:'Country',v:rv(r,'Country')||'–',c:''},
+    {l:'Zone',v:rv(r,'Zone')||'–',c:'teal'},
+    {l:"20' GP",v:fp(rv(r,"20'GP (USD)")),c:'blue'},
+    {l:"40' GP",v:fp(rv(r,"40'GP (USD)")),c:'blue'},
+    {l:"40' HC",v:fp(rv(r,"40'HC")),c:'teal'},
+    {l:"20' RF",v:fp(rv(r,"20'RF")),c:'amber'},
+    {l:"40' RF",v:fp(rv(r,"40'RF")),c:'amber'},
+    {l:'T/T',v:rv(r,'T/T')||'–',c:''},
+    {l:'Routing',v:dr?'Direct':ts,c:dr?'green':'amber'},
+    {l:'Freetime',v:rv(r,'Freetime')||'–',c:''},
+    {l:'Service',v:rv(r,'Service')||'–',c:'purple'},
+    {l:'Validity',v:vDisp,c:dl!==null&&dl<=7?'amber':''},
+  ];
+  document.getElementById('sum-grid').innerHTML=items.map(it=>`
+    <div><div class="si-lbl">${it.l}</div><div class="si-val" style="color:${it.c?'var(--'+it.c+')':'var(--text)'}">${it.v}</div></div>`).join('');
+  const rem=rv(r,'Remark')||'';
+  const rb=document.getElementById('sum-rem');
+  rb.textContent=rem&&rem!=='-'?fmtRemark(rem):'ไม่มีหมายเหตุ';
+  rb.className='sum-rem'+((!rem||rem==='-')?' empty':'');
+}
+
+// ═══════════════════════════════════════
+// COPY / SHARE / PRINT
+// ═══════════════════════════════════════
+function copyQuote(){
+  if(!currentRow)return;
+  const r=currentRow,ts=(rv(r,'T/S')||'').trim(),dr=isDirect(ts);
+  const text=`─────────────────────────────────────
+Route     : ${rv(r,'POL')||'–'} → ${rv(r,'POD')||'–'}
+Country   : ${rv(r,'Country')||'–'}
+Zone      : ${rv(r,'Zone')||'–'}
+Carrier   : ${rv(r,'Carrier')||'–'}
+Routing   : ${dr?'Direct':ts}
+Service   : ${rv(r,'Service')||'–'}
+
+Rates (USD / Container)
+  20' GP  : ${fp(rv(r,"20'GP (USD)"))}
+  40' GP  : ${fp(rv(r,"40'GP (USD)"))}
+  40' HC  : ${fp(rv(r,"40'HC"))}
+  20' RF  : ${fp(rv(r,"20'RF"))}
+  40' RF  : ${fp(rv(r,"40'RF"))}
+
+Transit Time : ${rv(r,'T/T')||'–'}
+Freetime     : ${rv(r,'Freetime')||'–'}
+Validity     : ${rv(r,'Validity')||'–'}
+${rv(r,'Remark')&&rv(r,'Remark')!=='-'?'\nRemark : '+rv(r,'Remark'):''}
+─────────────────────────────────────`;
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=document.getElementById('copy-btn');
+    b.textContent='✅ Copied!';b.classList.add('copied');
+    setTimeout(()=>{b.textContent='📋 Copy Quote';b.classList.remove('copied')},2500);
+  });
+}
+function shareRoute(){
+  if(!currentRow)return;
+  const r=currentRow;
+  const params=new URLSearchParams({pod:rv(r,'POD'),carrier:rv(r,'Carrier'),pol:rv(r,'POL')});
+  const url=`${location.origin}${location.pathname}?${params}`;
+  navigator.clipboard.writeText(url).then(()=>showToast('🔗 Copy link แล้ว!'));
+}
+function applyURLParams(){
+  const p=new URLSearchParams(location.search);
+  if(p.has('pod'))document.getElementById('f-pod').value=p.get('pod');
+  if(p.has('pod')||p.has('carrier')||p.has('pol'))setTimeout(doFilter,2100);
+}
+function printRoute(){
+  if(!currentRow)return;
+  const r=currentRow,ts=(rv(r,'T/S')||'').trim(),dr=isDirect(ts);
+  const html=`<div style="font-family:'DM Sans',sans-serif;max-width:580px;margin:0 auto;color:#111">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #c0392b">
+      <div style="width:38px;height:38px;background:#c0392b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px">NYL</div>
+      <div><div style="font-weight:700;font-size:15px">Ocean Freight Rate</div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">Namyong Logistics Company Limited</div></div>
+      <div style="margin-left:auto;font-size:10px;color:#999">${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</div>
+    </div>
+    <div style="font-size:20px;font-weight:800;margin-bottom:5px">${rv(r,'POL')||'–'} <span style="color:#c0392b">→</span> ${rv(r,'POD')||'–'}</div>
+    <div style="color:#666;margin-bottom:18px">${rv(r,'Carrier')||'–'} · ${rv(r,'Country')||'–'} · Zone: ${rv(r,'Zone')||'–'}</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:18px">
+      ${[["20' GP",fp(rv(r,"20'GP (USD)"))],["40' GP",fp(rv(r,"40'GP (USD)"))],["40' HC",fp(rv(r,"40'HC"))],["20' RF",fp(rv(r,"20'RF"))],["40' RF",fp(rv(r,"40'RF"))]].map(([l,v])=>`<tr style="border-bottom:1px solid #eee"><td style="padding:7px 0;color:#666;width:50%">${l}</td><td style="padding:7px 0;font-weight:600;font-size:14px;color:${v==='N/A'?'#ccc':'#2878e0'}">${v}</td></tr>`).join('')}
+    </table>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:18px">
+      ${[["Routing",dr?'Direct':ts],["T/T",rv(r,'T/T')||'–'],["Freetime",rv(r,'Freetime')||'–'],["Service",rv(r,'Service')||'–'],["Validity",rv(r,'Validity')||'–']].map(([l,v])=>`<tr style="border-bottom:1px solid #eee"><td style="padding:6px 0;color:#666;width:40%">${l}</td><td style="padding:6px 0;font-weight:500">${v}</td></tr>`).join('')}
+    </table>
+    ${rv(r,'Remark')&&rv(r,'Remark')!=='-'?`<div style="background:#fff8f0;border-left:3px solid #e8a020;padding:10px 14px;font-size:11px;color:#666;border-radius:0 6px 6px 0;line-height:1.8"><strong>Remark:</strong> ${rv(r,'Remark')}</div>`:''}
+    <div style="margin-top:20px;padding-top:10px;border-top:1px solid #eee;font-size:10px;color:#999;text-align:center">Namyong Logistics Company Limited — ${new Date().toLocaleString('th-TH')}</div>
+  </div>`;
+  const pa=document.getElementById('print-area');
+  pa.style.display='block';pa.innerHTML=html;
+  setTimeout(()=>{window.print();pa.style.display='none'},200);
+}
+
+// ═══════════════════════════════════════
+// PRICE MODAL
+// ═══════════════════════════════════════
+function openPriceModal(e,row,col){
+  e.stopPropagation();
+  const v=row[col]||'',p=fmtPrice(v);if(p.isNil)return;
+  const canon=Object.entries(keyMap).find(([c,k])=>k===col)?.[0]||col;
+  document.getElementById('pm-type').textContent=PRICE_LABELS[canon]||canon;
+  document.getElementById('pm-pol').textContent=rv(row,'POL')||'–';
+  document.getElementById('pm-pod').textContent=rv(row,'POD')||'–';
+  document.getElementById('pm-amount').textContent=p.isText?p.display:(p.num||0).toLocaleString();
+  document.getElementById('pm-ctype').textContent=(PRICE_LABELS[canon]||canon)+' Container';
+  const ts=(rv(row,'T/S')||'').trim(),dr=isDirect(ts);
+  document.getElementById('pm-grid').innerHTML=[
+    {l:'Country',v:rv(row,'Country')||'–',c:''},
+    {l:'Zone',v:rv(row,'Zone')||'–',c:'teal'},
+    {l:'Carrier',v:rv(row,'Carrier')||'–',c:''},
+    {l:'T/T',v:rv(row,'T/T')||'–',c:'amber'},
+    {l:'Routing',v:dr?'Direct':ts,c:dr?'green':'amber'},
+    {l:'Freetime',v:rv(row,'Freetime')||'–',c:''},
+    {l:'Validity',v:rv(row,'Validity')||'–',c:'amber'},
+    {l:'Service',v:rv(row,'Service')||'–',c:'purple'},
+  ].map(it=>`<div class="pm-item"><div class="pm-item-lbl">${it.l}</div><div class="pm-item-val" style="color:${it.c?'var(--'+it.c+')':'var(--text)'}">${it.v}</div></div>`).join('');
+  const others=PRICE_COLS_NORM.filter(c=>keyMap[c]&&keyMap[c]!==col).map(c=>{const pp=fmtPrice(rv(row,c));return`${PRICE_LABELS[c]}: ${pp.isNil?'N/A':pp.display}`}).join(' · ');
+  const rem=rv(row,'Remark');
+  document.getElementById('pm-note').textContent='Other: '+others+(rem&&rem!=='-'?'\nRemark: '+rem:'');
+  document.getElementById('price-modal').classList.add('show');
+}
+function closePM(){document.getElementById('price-modal').classList.remove('show')}
+
+// ═══════════════════════════════════════
+// TABS / VIEWS
+// ═══════════════════════════════════════
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');document.getElementById('pane-'+name).classList.add('on');
+}
+function switchView(name,btn){
+  // desktop nav
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));
+  // mobile nav
+  document.querySelectorAll('.mob-nav-btn').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  // sync both navs
+  document.querySelectorAll(`[onclick*="'${name}'"]`).forEach(b=>b.classList.add('on'));
+  document.getElementById('view-'+name).classList.add('on');
+  if(name==='history')renderHistory();
+  if(name==='compare')renderCompare();
+  if(name!=='main')closePanel();
+}
+
+// ═══════════════════════════════════════
+// STATUS / LOADING
+// ═══════════════════════════════════════
+function setStatus(s){
+  const d=document.getElementById('dot'),t=document.getElementById('dot-txt');d.className='dot';
+  if(s==='on'){d.classList.add('on');t.textContent='Live'}
+  else if(s==='err'){d.classList.add('err');t.textContent='Error'}
+  else t.textContent='…';
+}
+function showLoading(){
+  document.getElementById('tbl-wrap').innerHTML='<div class="state-box"><div class="spinner"></div><p>กำลังโหลด…</p></div>';
+  document.getElementById('card-list').innerHTML='<div class="state-box"><div class="spinner"></div><p>กำลังโหลด…</p></div>';
+}
+function showErr(m){
+  document.getElementById('tbl-wrap').innerHTML=`<div class="state-box"><span class="ico">⚠️</span><p>โหลดไม่ได้</p><small>${m}</small></div>`;
+  document.getElementById('card-list').innerHTML=`<div class="state-box"><span class="ico">⚠️</span><p>โหลดไม่ได้</p><small>${m}</small></div>`;
+}
+
+// ═══════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════
+function exportCSV(){
+  if(!filteredData.length)return;
+  const rows=[headers,...filteredData.map(r=>headers.map(h=>`"${(r[h]||'').replace(/"/g,'""')}"`))]
+    .map(r=>r.join(',')).join('\n');
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob(['\uFEFF'+rows],{type:'text/csv;charset=utf-8;'})),download:'NYL_Rate_'+new Date().toISOString().slice(0,10)+'.csv'});
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePM();closePanel()}});
+// Swipe down to close panel on mobile
+let touchStartY=0;
+document.getElementById('panel').addEventListener('touchstart',e=>touchStartY=e.touches[0].clientY,{passive:true});
+document.getElementById('panel').addEventListener('touchend',e=>{
+  if(e.changedTouches[0].clientY-touchStartY>80)closePanel();
+},{passive:true});
+</script>
+</body>
+</html>
